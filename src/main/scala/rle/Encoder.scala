@@ -4,9 +4,11 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.ChiselEnum
 
+import rle.Stream
+
 class EncoderIO[T <: UInt](gen: T) extends Bundle {
-  val in = Flipped(Decoupled(gen))
-  val out = Decoupled(gen)
+  val in = Flipped(Stream(gen))
+  val out = Stream(gen)
 }
 
 object EncoderState extends ChiselEnum {
@@ -36,6 +38,9 @@ class Encoder[T <: UInt](gen: T, rle_zero: Int) extends Module {
   io.out.bits := DontCare
   io.out.valid := false.B
   io.in.ready := false.B
+
+  // FIXME: directly connect through for now
+  io.out.last := io.in.last
 
   // create the finite state machine
   switch (state) {

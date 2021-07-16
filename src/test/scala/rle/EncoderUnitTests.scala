@@ -1,6 +1,7 @@
 package rle.encoder_test
 
 import rle.Encoder
+import rle.test.StreamDriver
 
 import org.scalatest._
 
@@ -22,18 +23,22 @@ class EncoderTest extends FlatSpec with ChiselScalatestTester with Matchers {
     // create the DUT
     test(new Encoder(UInt(8.W), 0)).withAnnotations(annotations) { c =>
 
+      // convert to stream interfaces to StreamDriver
+      val in  = new StreamDriver(c.io.in)
+      val out = new StreamDriver(c.io.out)
+
       // create test sequences
       val seq_in = Seq(1.U, 2.U, 3.U, 4.U, 5.U, 6.U, 7.U, 8.U, 9.U)
       val seq_out = Seq(1.U, 2.U, 3.U, 4.U, 5.U, 6.U, 7.U, 8.U, 9.U)
 
       // module setup
-      c.io.in.initSource().setSourceClock(c.clock)
-      c.io.out.initSink().setSinkClock(c.clock)
+      in.initSource().setSourceClock(c.clock)
+      out.initSink().setSinkClock(c.clock)
 
       // run the sequences
       parallel(
-        c.io.in.enqueueSeq(seq_in),
-        c.io.out.expectDequeueSeq(seq_out)
+        in.enqueueSeq(seq_in),
+        out.expectDequeueSeq(seq_out)
       )
 
     }
@@ -44,18 +49,22 @@ class EncoderTest extends FlatSpec with ChiselScalatestTester with Matchers {
     // create the DUT
     test(new Encoder(UInt(8.W), 0)).withAnnotations(annotations) { c =>
 
+      // convert to stream interfaces to StreamDriver
+      val in  = new StreamDriver(c.io.in)
+      val out = new StreamDriver(c.io.out)
+
       // create test sequences
       val seq_in = Seq(1.U, 2.U, 0.U, 0.U, 0.U, 0.U, 7.U, 8.U, 9.U)
       val seq_out = Seq(1.U, 2.U, 0.U, 4.U, 7.U, 8.U, 9.U)
 
       // module setup
-      c.io.in.initSource().setSourceClock(c.clock)
-      c.io.out.initSink().setSinkClock(c.clock)
+      in.initSource().setSourceClock(c.clock)
+      out.initSink().setSinkClock(c.clock)
 
       // run the sequences
       parallel(
-        c.io.in.enqueueSeq(seq_in),
-        c.io.out.expectDequeueSeq(seq_out)
+        in.enqueueSeq(seq_in),
+        out.expectDequeueSeq(seq_out)
       )
 
     }
