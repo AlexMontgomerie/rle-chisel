@@ -34,24 +34,33 @@ class Encoder[T <: UInt](gen: T, rle_zero: Int) extends Module {
   val max_rle_cntr = scala.math.pow(2,bit_width).toInt-1
   val rle_cntr = RegInit(0.U(bit_width.W))
 
+  // cache for the last signal
+  val last_cache = RegInit(false.B)
+
   // set defaults
   io.out.bits := DontCare
   io.out.valid := false.B
   io.in.ready := false.B
-
-  // FIXME: directly connect through for now
-  io.out.last := io.in.last
+  io.out.last := false.B
 
   // create the finite state machine
   switch (state) {
     is(EncoderState.EMPTY) {
       when (io.in.bits =/= rle_zero.U && io.in.valid) {
         // pass value straight through if it's not an rle zero
+        io.out.last := io.in.last
         state := EncoderState.EMPTY
       } .elsewhen ( io.in.bits === rle_zero.U && io.in.valid ) {
         // move to the FILL state if the incoming value is an rle
         // zero, and update the rle counter
-        state := EncoderState.FILL
+        when(io.in.last) {
+          // DUMP the single zero
+          state := EncoderState.DUMP
+        } .otherwise {
+          // go to the FILL state
+          state := EncoderState.FILL
+        }
+        io.out.last := false.B
         rle_cntr := 1.U
       }
       // connect the ready signal straight through, and the
@@ -72,10 +81,25 @@ class Encoder[T <: UInt](gen: T, rle_zero: Int) extends Module {
         // keep in current state, and increment the rle counter
         io.out.bits   := DontCare
         io.out.valid  := false.B
+        io.out.last   := false.B
         io.in.ready   := true.B
-        state := EncoderState.FILL
+        when (io.in.last) {
+          state := EncoderState.DUMP
+        } .otherwise {
+          state := EncoderState.FILL
+        }
         rle_cntr := rle_cntr + 1.U
       }
+      // cache the last signal
+      last_cache := io.in.last
+    }
+    is(EncoderState.DUMP) {
+      // dump the stored rle counter
+      io.out.bits   := rle_cntr
+      io.out.valid  := true.B
+      io.out.last   := true.B
+      io.in.ready   := false.B
+      state := EncoderState.EMPTY
     }
   }
 }
