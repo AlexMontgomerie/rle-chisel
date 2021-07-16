@@ -22,7 +22,7 @@ class EncoderTest extends FlatSpec with ChiselScalatestTester with Matchers {
     val annotations = Seq(VerilatorBackendAnnotation,WriteVcdAnnotation)
 
     behavior of "Encoder"
-    it should s"be correct for $description" in {
+    it should s"be correct for $description (Encoder)" in {
       // create the DUT
       test(new Encoder(UInt(8.W), 0)).withAnnotations(annotations) { c =>
 
@@ -64,7 +64,6 @@ class EncoderTest extends FlatSpec with ChiselScalatestTester with Matchers {
   seq_in = Seq(1.U, 2.U, 7.U, 8.U, 9.U, 0.U)
   seq_out = Seq(1.U, 2.U, 7.U, 8.U, 9.U, 0.U, 1.U)
   run_test(seq_in, seq_out, description)
-
 
 }
 

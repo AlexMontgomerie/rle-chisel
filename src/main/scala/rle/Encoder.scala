@@ -12,7 +12,7 @@ class EncoderIO[T <: UInt](gen: T) extends Bundle {
 }
 
 object EncoderState extends ChiselEnum {
-  val EMPTY, FILL, DUMP, OVERFLOW = Value
+  val EMPTY, FILL, DUMP = Value
 }
 
 class Encoder[T <: UInt](gen: T, rle_zero: Int) extends Module {
