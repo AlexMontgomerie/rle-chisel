@@ -4,6 +4,19 @@
 set name [ lindex $argv 0 ]
 set v_source [ lindex $argv 1 ]
 
+# create ip properties
+set ip_properties [ list \
+    vendor "alexmontgomerie.co.uk" \
+    library "rle" \
+    name ${name} \
+    version "1.0" \
+    taxonomy "/Compression" \
+    display_name ${name} \
+    description "rle ${name}" \
+    vendor_display_name "Alex Montgomerie" \
+    company_url "https://alexmontgomerie.co.uk" \
+]
+
 # create the project
 set ip_project [ create_project -name ${name} -force -dir "./${name}_prj" -ip ]
 set_property top Encoder [current_fileset]
@@ -15,6 +28,7 @@ update_compile_order -fileset sources_1
 # package the ip
 ipx::package_project
 set ip_core [ipx::current_core]
+set_property -dict ${ip_properties} ${ip_core}
 
 # add the input axi stream
 
@@ -70,7 +84,6 @@ set_property value reset $aclk_assoc_reset
 
 # save the ip
 set_property core_revision 2 ${ip_core}
-ipx::create_xgui_files ${ip_core}
 ipx::update_checksums ${ip_core}
 ipx::check_integrity ${ip_core}
 ipx::save_core ${ip_core}
